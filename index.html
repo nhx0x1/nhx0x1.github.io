@@ -41,15 +41,14 @@
             cursor: crosshair;
         }
 
-        /* Noise texture overlay */
-        body::before {
-            content: '';
+        /* Animated noise canvas */
+        #noise-canvas {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
             pointer-events: none;
             z-index: 9998;
+            opacity: 0.18;
         }
 
         /* Scanline */
@@ -525,6 +524,8 @@
 </head>
 <body>
 
+<canvas id="noise-canvas"></canvas>
+
 <nav>
     <div class="nav-inner">
         <div class="nav-handle">NH<span class="x">X</span>0X1</div>
@@ -547,7 +548,7 @@
             <span class="w">web application security</span>.
             Breaking auth flows, chasing access control flaws.
             <br><br>
-            Based in <span class="w">Bojonegoro - Surabaya</span>, ID.
+            Based in <span class="w">Surabaya</span>, ID.
         </p>
         <div class="hero-coord">
             7.2635&deg; S, 112.7425&deg; E<br>
@@ -614,6 +615,12 @@
             <span class="tool">Arch Linux</span>
             <span class="tool">CachyOS</span>
             <span class="tool">Kali</span>
+            <span class="tool">Nmap</span>
+            <span class="tool">ffuf</span>
+            <span class="tool">Nuclei</span>
+            <span class="tool">Python</span>
+            <span class="tool">Bash</span>
+            <span class="tool">Git</span>
         </div>
     </section>
 
@@ -625,7 +632,7 @@
         <div class="links-stack">
             <a href="https://github.com/nhx0x1" target="_blank" class="link-row">
                 <span class="link-label">GitHub</span>
-                <span class="link-url">https://github.com/nhx0x1</span>
+                <span class="link-url">github.com/nhx0x1</span>
                 <span class="link-arrow">&rarr;</span>
             </a>
             <a href="https://linkedin.com/in/" target="_blank" class="link-row">
@@ -635,7 +642,7 @@
             </a>
             <a href="https://hackerone.com/" target="_blank" class="link-row">
                 <span class="link-label">HackerOne</span>
-                <span class="link-url">https://hackerone.com/ardxcryz?type=user</span>
+                <span class="link-url">hackerone.com/...</span>
                 <span class="link-arrow">&rarr;</span>
             </a>
         </div>
@@ -669,6 +676,34 @@
             if (t) t.scrollIntoView({ behavior: 'smooth' });
         });
     });
+
+    // Animated grain noise
+    const noiseCanvas = document.getElementById('noise-canvas');
+    const noiseCtx = noiseCanvas.getContext('2d');
+    let noiseW, noiseH;
+
+    function resizeNoise() {
+        // Use smaller resolution for performance, CSS scales it up
+        noiseW = noiseCanvas.width = Math.ceil(window.innerWidth / 3);
+        noiseH = noiseCanvas.height = Math.ceil(window.innerHeight / 3);
+    }
+    resizeNoise();
+    window.addEventListener('resize', resizeNoise);
+
+    function drawNoise() {
+        const imageData = noiseCtx.createImageData(noiseW, noiseH);
+        const data = imageData.data;
+        for (let i = 0, len = data.length; i < len; i += 4) {
+            const v = Math.random() * 255;
+            data[i] = v;
+            data[i + 1] = v;
+            data[i + 2] = v;
+            data[i + 3] = 255;
+        }
+        noiseCtx.putImageData(imageData, 0, 0);
+        requestAnimationFrame(drawNoise);
+    }
+    drawNoise();
 
     // Moving scanline
     const scanline = document.createElement('div');
